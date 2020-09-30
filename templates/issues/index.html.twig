@@ -1,11 +1,14 @@
 {% extends "base.html.twig" %}
 
 {% block body %}
-    {{ form(createIssueForm) }}
+	{{ form(createIssueForm) }}
 
     <ul>
         {% for issue in issues %}
-            <li><a href="{{ url('app_issue_show', { id: issue.id }) }}">{{ issue.title }}</li>
+            <li>
+                <a href="{{ url('app_issue_show', { id: issue.id }) }}">{{ issue.title }}</a>
+                {{ form(deleteForms[loop.index0]) }}
+            </li>
         {% endfor %}
     </ul>
 {% endblock %}

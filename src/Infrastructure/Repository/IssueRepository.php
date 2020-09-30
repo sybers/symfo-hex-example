@@ -4,7 +4,7 @@ namespace App\Infrastructure\Repository;
 
 use App\Application\Repository\IssueRepositoryInterface;
 use App\Domain\Entity\Issue;
-use App\Domain\Exception\IssueNotFoundException;
+use App\Domain\Exception\EntityNotFoundException;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -28,7 +28,7 @@ class IssueRepository extends ServiceEntityRepository implements IssueRepository
         $issue = $this->find($id);
 
         if (null === $issue) {
-            throw new IssueNotFoundException();
+            throw new EntityNotFoundException();
         }
 
         return $issue;

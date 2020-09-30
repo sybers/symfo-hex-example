@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Application\Query;
+namespace App\Application\Command;
 
-final class CreateIssueQuery
+final class CreateIssueCommand
 {
     private string $title;
 

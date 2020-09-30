@@ -2,13 +2,16 @@
 
 namespace App\Infrastructure\Controller;
 
-use App\Application\Query\CreateIssueQuery;
+use App\Application\Command\CreateIssueCommand;
+use App\Application\Command\DeleteIssueCommand;
 use App\Application\Query\GetIssueByIDQuery;
 use App\Application\Query\ListAllIssuesQuery;
 use App\Domain\Exception\EntityNotFoundException;
+use App\Domain\Exception\ValidationException;
 use App\Infrastructure\Form\Type\CreateIssueFormType;
 use App\Infrastructure\QueryBus;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -36,18 +39,34 @@ class IssueController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $issue = $form->getData();
 
-            $this->queryBus->query(new CreateIssueQuery($issue['title'], $issue['content']));
+            try {
+                $this->queryBus->query(new CreateIssueCommand($issue['title'], $issue['content']));
 
-            $this->addFlash('success', 'Issue created');
+                $this->addFlash('success', 'Issue created');
 
-            return $this->redirectToRoute('app_issue_index');
+                return $this->redirectToRoute('app_issue_index');
+            } catch (ValidationException $exception) {
+                return new Response('Validation failed', 400);
+            }
         }
 
         $order = $request->query->get('orderBy', 'title');
         $issues = $this->queryBus->query(new ListAllIssuesQuery($order));
 
+        $deleteForms = [];
+        foreach ($issues as $issue) {
+            $builder = $this->createFormBuilder();
+            $builder
+                ->setAction($this->generateUrl('app_issue_delete', ['id' => $issue->getID()]))
+                ->setMethod('DELETE')
+                ->add('submit', SubmitType::class, ['label' => 'x']);
+
+            $deleteForms[] = $builder->getForm()->createView();
+        }
+
         return $this->render('issues/index.html.twig', [
             'issues' => $issues,
+            'deleteForms' => $deleteForms,
             'createIssueForm' => $form->createView()
         ]);
     }
@@ -63,6 +82,22 @@ class IssueController extends AbstractController
             return $this->render('issues/show.html.twig', [
                 'issue' => $issue
             ]);
+        } catch (EntityNotFoundException $exception) {
+            return new Response('Issue not found', 404);
+        }
+    }
+
+    /**
+     * @Route("/{id}", name="delete", methods={"DELETE"})
+     */
+    public function delete(int $id): Response
+    {
+        try {
+            $this->queryBus->query(new DeleteIssueCommand($id));
+
+            $this->addFlash("success", "Issue deleted");
+
+            return $this->redirectToRoute('app_issue_index');
         } catch (EntityNotFoundException $exception) {
             return new Response('Issue not found', 404);
         }
