@@ -1,0 +1,16 @@
+App\Domain\Entity\Issue:
+  type: entity
+  table: issues
+
+  id:
+    id:
+      type: integer
+      generator:
+        strategy: AUTO
+
+  fields:
+    title:
+      type: string
+
+    content:
+      type: text
