@@ -1,0 +1,21 @@
+App\Domain\Entity\User:
+  type: entity
+  table: users
+
+  id:
+    id:
+      type: integer
+      generator:
+        strategy: AUTO
+
+  fields:
+    email:
+      type: string
+      length: 180
+      unique: true
+
+    password:
+      type: string
+
+    roles:
+      type: json
