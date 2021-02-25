@@ -6,6 +6,8 @@ class Issue
 {
     protected ?int $id;
 
+    protected ?User $createdBy;
+
     protected ?string $title;
 
     protected ?string $content;
@@ -18,6 +20,14 @@ class Issue
     public function setID(?int $id): void
     {
         $this->id = $id;
+    }
+
+    public function getCreatedBy(): ?User {
+        return $this->createdBy;
+    }
+
+    public function setCreatedBy(?User $user): void {
+        $this->createdBy = $user;
     }
 
     public function getTitle(): ?string

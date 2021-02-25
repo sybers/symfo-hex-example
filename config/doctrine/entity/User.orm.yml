@@ -19,3 +19,8 @@ App\Domain\Entity\User:
 
     roles:
       type: json
+
+  oneToMany:
+    issues:
+      targetEntity: App\Domain\Entity\Issue
+      mappedBy: createdBy

@@ -2,17 +2,26 @@
 
 namespace App\Domain\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class User implements UserInterface
 {
-    private $id;
+    private ?int $id;
 
-    private $email;
+    private ?string $email;
 
-    private $roles = [];
+    private array $roles = [];
 
-    private $password;
+    private ?string $password;
+
+    private Collection $issues;
+
+    public function __construct()
+    {
+        $this->issues = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -24,11 +33,9 @@ class User implements UserInterface
         return $this->email;
     }
 
-    public function setEmail(string $email): self
+    public function setEmail(string $email): void
     {
         $this->email = $email;
-
-        return $this;
     }
 
     /**
@@ -53,11 +60,9 @@ class User implements UserInterface
         return array_unique($roles);
     }
 
-    public function setRoles(array $roles): self
+    public function setRoles(array $roles): void
     {
         $this->roles = $roles;
-
-        return $this;
     }
 
     /**
@@ -68,11 +73,9 @@ class User implements UserInterface
         return (string) $this->password;
     }
 
-    public function setPassword(string $password): self
+    public function setPassword(string $password): void
     {
         $this->password = $password;
-
-        return $this;
     }
 
     /**
@@ -93,5 +96,24 @@ class User implements UserInterface
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
+    }
+
+    public function getIssues(): ArrayCollection
+    {
+        return $this->issues;
+    }
+
+    public function addIssue(Issue $issue): void
+    {
+        if ($this->issues->contains($issue)) {
+            return;
+        }
+
+        $this->issues->add($issue);
+    }
+
+    public function removeIssue(Issue $issue): void
+    {
+        $this->issues->removeElement($issue);
     }
 }

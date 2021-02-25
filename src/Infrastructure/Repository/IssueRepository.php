@@ -7,17 +7,24 @@ use App\Domain\Entity\Issue;
 use App\Domain\Exception\EntityNotFoundException;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Security\Core\Security;
 
 class IssueRepository extends ServiceEntityRepository implements IssueRepositoryInterface
 {
-    public function __construct(ManagerRegistry $registry)
+    private Security $security;
+
+    public function __construct(ManagerRegistry $registry, Security $security)
     {
         parent::__construct($registry, Issue::class);
+        $this->security = $security;
     }
 
     public function findAll(string $order = 'title'): array
     {
-        $qb = $this->createQueryBuilder('i')
+        $user = $this->security->getUser();
+
+        $qb = $this->createQueryBuilder('i');
+        $qb->where($qb->expr()->eq("i.createdBy", $user->getId()))
             ->orderBy("i.$order", "ASC");
 
         return $qb->getQuery()->getResult();
@@ -25,7 +32,8 @@ class IssueRepository extends ServiceEntityRepository implements IssueRepository
 
     public function findByID(int $id): Issue
     {
-        $issue = $this->find($id);
+        $user = $this->security->getUser();
+        $issue = $this->findOneBy(['id' => $id, 'createdBy' => $user->getId()]);
 
         if (null === $issue) {
             throw new EntityNotFoundException();

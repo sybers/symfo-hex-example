@@ -14,3 +14,11 @@ App\Domain\Entity\Issue:
 
     content:
       type: text
+
+  manyToOne:
+    createdBy:
+      targetEntity: App\Domain\Entity\User
+      inversedBy: issues
+      joinColumn:
+        name: created_by_id
+        referencedColumnName: id
