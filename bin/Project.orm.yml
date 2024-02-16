@@ -1,6 +1,6 @@
-App\Domain\Entity\Issue:
+App\Domain\Entity\Project:
   type: entity
-  table: issues
+  table: projects
 
   id:
     id:
@@ -9,16 +9,17 @@ App\Domain\Entity\Issue:
         strategy: AUTO
 
   fields:
-    title:
+    name:
       type: string
 
-    content:
+    description:
       type: text
+      nullable: true
 
   manyToOne:
     createdBy:
       targetEntity: App\Domain\Entity\User
-      inversedBy: issues
+      inversedBy: projects
       joinColumn:
         name: created_by_id
         referencedColumnName: id

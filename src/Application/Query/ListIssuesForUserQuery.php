@@ -4,16 +4,16 @@ namespace App\Application\Query;
 
 use App\Domain\Entity\User;
 
-final class GetIssueByIDQuery
+final class ListIssuesForUserQuery
 {
     private User $createdBy;
 
-    private int $id;
+    private string $order;
 
-    public function __construct(User $createdBy, string $id)
+    public function __construct(User $createdBy, string $order = 'title')
     {
         $this->createdBy = $createdBy;
-        $this->id = $id;
+        $this->order = $order;
     }
 
     public function getCreatedBy(): User
@@ -21,8 +21,8 @@ final class GetIssueByIDQuery
         return $this->createdBy;
     }
 
-    public function getID(): int
+    public function getOrder(): string
     {
-        return $this->id;
+        return $this->order;
     }
 }

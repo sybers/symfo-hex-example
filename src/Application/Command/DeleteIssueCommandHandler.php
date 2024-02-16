@@ -24,6 +24,10 @@ final class DeleteIssueCommandHandler implements MessageHandlerInterface
     {
         $issue = $this->issueRepository->findByID($command->getId());
 
+        if ($issue->getCreatedBy()->getId() !== $command->getCreatedBy()->getId()) {
+            throw new \Exception('User is not allowed to delete this issue.');
+        }
+
         $this->entityManager->remove($issue);
         $this->entityManager->flush();
     }

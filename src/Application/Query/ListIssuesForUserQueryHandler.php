@@ -5,7 +5,7 @@ namespace App\Application\Query;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 use App\Application\Repository\IssueRepositoryInterface;
 
-class ListAllIssuesQueryHandler implements MessageHandlerInterface
+class ListIssuesForUserQueryHandler implements MessageHandlerInterface
 {
     private IssueRepositoryInterface $issueRepository;
 
@@ -14,8 +14,8 @@ class ListAllIssuesQueryHandler implements MessageHandlerInterface
         $this->issueRepository = $issueRepository;
     }
 
-    public function __invoke(ListAllIssuesQuery $query)
+    public function __invoke(ListIssuesForUserQuery $query)
     {
-        return $this->issueRepository->findAll($query->getOrder());
+        return $this->issueRepository->findByUser($query->getCreatedBy(), $query->getOrder());
     }
 }

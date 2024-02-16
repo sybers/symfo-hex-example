@@ -13,30 +13,22 @@ final class CreateIssueCommandHandler implements MessageHandlerInterface
 {
     private EntityManagerInterface $entityManager;
     private ValidatorInterface $validator;
-    private Security $security;
 
     public function __construct(
         EntityManagerInterface $entityManager,
-        ValidatorInterface $validator,
-        Security $security
+        ValidatorInterface $validator
     ) {
         $this->entityManager = $entityManager;
         $this->validator = $validator;
-        $this->security = $security;
     }
 
     public function __invoke(CreateIssueCommand $command)
     {
-        $user = $this->security->getUser();
-        if (null === $user) {
-            throw new \Exception("User not logged in");
-        }
-
         $issue = new Issue();
 
         $issue->setTitle($command->getTitle());
         $issue->setContent($command->getContent());
-        $issue->setCreatedBy($user);
+        $issue->setCreatedBy($command->getCreatedBy());
 
         $errors = $this->validator->validate($issue);
 

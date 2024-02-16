@@ -5,11 +5,13 @@ namespace App\Infrastructure\Controller;
 use App\Application\Command\CreateIssueCommand;
 use App\Application\Command\DeleteIssueCommand;
 use App\Application\Query\GetIssueByIDQuery;
-use App\Application\Query\ListAllIssuesQuery;
+use App\Application\Query\ListIssuesForUserQuery;
 use App\Domain\Exception\EntityNotFoundException;
+use App\Domain\Exception\NotAllowedException;
 use App\Domain\Exception\ValidationException;
 use App\Infrastructure\Form\Type\CreateIssueFormType;
 use App\Infrastructure\QueryBus;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
@@ -40,18 +42,24 @@ class IssueController extends AbstractController
             $issue = $form->getData();
 
             try {
-                $this->queryBus->query(new CreateIssueCommand($issue['title'], $issue['content']));
+                $this->queryBus->query(new CreateIssueCommand(
+                    $this->getUser(),
+                    $issue['title'],
+                    $issue['content']
+                ));
 
                 $this->addFlash('success', 'Issue created');
 
                 return $this->redirectToRoute('app_issue_index');
             } catch (ValidationException $exception) {
                 return new Response('Validation failed', 400);
+            } catch (NotAllowedException $exception) {
+                return new Response('Not allowed', 403);
             }
         }
 
         $order = $request->query->get('orderBy', 'title');
-        $issues = $this->queryBus->query(new ListAllIssuesQuery($order));
+        $issues = $this->queryBus->query(new ListIssuesForUserQuery($this->getUser(), $order));
 
         $deleteForms = [];
         foreach ($issues as $issue) {
@@ -77,13 +85,15 @@ class IssueController extends AbstractController
     public function show(int $id): Response
     {
         try {
-            $issue = $this->queryBus->query(new GetIssueByIDQuery($id));
+            $issue = $this->queryBus->query(new GetIssueByIDQuery($this->getUser(), $id));
 
             return $this->render('issues/show.html.twig', [
                 'issue' => $issue
             ]);
         } catch (EntityNotFoundException $exception) {
             return new Response('Issue not found', 404);
+        } catch (NotAllowedException $exception) {
+            return new Response('Not allowed', 403);
         }
     }
 
@@ -93,13 +103,15 @@ class IssueController extends AbstractController
     public function delete(int $id): Response
     {
         try {
-            $this->queryBus->query(new DeleteIssueCommand($id));
+            $this->queryBus->query(new DeleteIssueCommand($this->getUser(), $id));
 
             $this->addFlash("success", "Issue deleted");
 
             return $this->redirectToRoute('app_issue_index');
         } catch (EntityNotFoundException $exception) {
             return new Response('Issue not found', 404);
+        } catch (NotAllowedException $exception) {
+            return new Response('Not allowed', 403);
         }
     }
 }
